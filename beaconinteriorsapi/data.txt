@@ -1,0 +1,62 @@
+[
+  {
+    "Name": "Modern Sofa",
+    "Summary": "A comfy 3-seater",
+    "Description": "Spacious and modern design with durable fabric.",
+    "Price": 499.99,
+    "Quantity": 10,
+    "Categories": [
+      { "Name": "Furniture" },
+      { "Name": "Living Room" }
+    ],
+    "Images": ["sofa1.jpg", "sofa2.jpg"]
+  },
+  {
+    "Name": "Wooden Coffee Table",
+    "Summary": "Oak finish coffee table",
+    "Description": "Elegant coffee table made from solid oak.",
+    "Price": 129.99,
+    "Quantity": 25,
+    "Categories": [
+      { "Name": "Furniture" },
+      { "Name": "Tables" }
+    ],
+    "Images": ["table1.jpg"]
+  },
+  {
+    "Name": "Floor Lamp",
+    "Summary": "Stylish standing lamp",
+    "Description": "Provides warm lighting with adjustable height.",
+    "Price": 89.99,
+    "Quantity": 15,
+    "Categories": [
+      { "Name": "Lighting" },
+      { "Name": "Living Room" }
+    ],
+    "Images": ["lamp1.jpg", "lamp2.jpg"]
+  },
+  {
+    "Name": "Bookshelf",
+    "Summary": "5-tier open shelf",
+    "Description": "Contemporary bookshelf suitable for any room.",
+    "Price": 199.99,
+    "Quantity": 5,
+    "Categories": [
+      { "Name": "Furniture" },
+      { "Name": "Storage" }
+    ],
+    "Images": ["bookshelf1.jpg"]
+  },
+  {
+    "Name": "Office Chair",
+    "Summary": "Ergonomic chair",
+    "Description": "Comfortable office chair with lumbar support.",
+    "Price": 149.99,
+    "Quantity": 30,
+    "Categories": [
+      { "Name": "Furniture" },
+      { "Name": "Office" }
+    ],
+    "Images": ["chair1.jpg", "chair2.jpg"]
+  }
+]
