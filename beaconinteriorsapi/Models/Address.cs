@@ -8,6 +8,7 @@
         public required string PostCode  { get; set; }
         public required string Country { get; set; }
         public AddressType AddressType { get; set; }
+        public Guid OrderId { get; set; }
         public Address()
         {
             

@@ -26,12 +26,13 @@ namespace beaconinteriorsapi.Services
                 await seeder.RunTestAsync();
                 await seeder.SeedCategories();
                 await seeder.SeedProductsAsync();
+                await seeder.SeedOrdersAsync();
                 _logger.LogInformation("seeding and test completed");
 
             }
             catch (Exception e)
             {
-                _logger.LogInformation($"unable to complete seeding and test due to error:{e.Message}");
+                _logger.LogError($"unable to complete seeding and file upload test due to error:{e.Message}");
             }
         }
     }

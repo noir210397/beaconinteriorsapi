@@ -1,7 +1,5 @@
 ﻿using beaconinteriorsapi.Data;
-using beaconinteriorsapi.DTOS;
 using beaconinteriorsapi.Models;
-using beaconinteriorsapi.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace beaconinteriorsapi.Repositories

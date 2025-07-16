@@ -1,6 +1,6 @@
 ﻿namespace beaconinteriorsapi.Models
 {
-    public class TrackingModel
+    public class Tracking
     {
         public long Id { get; set; }
         public long CurrentTrackingCount { get; set; }

@@ -12,7 +12,9 @@ namespace beaconinteriorsapi.Data
         public DbSet<Product> Products { get; set; } 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<TrackingModel> Tracking { get; set; }
+        public DbSet<Tracking> Tracking { get; set; }
+        //public DbSet<Address> Addresses { get; set; }       
+        //public DbSet<OrderItems> OrderItems { get; set; }
 
     }
 }

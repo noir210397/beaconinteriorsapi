@@ -1,4 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using beaconinteriorsapi.Commands;
+using beaconinteriorsapi.DTOS;
+using beaconinteriorsapi.Services;
+using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Mvc;
+using static beaconinteriorsapi.Exceptions.ExceptionHelpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,36 +15,29 @@ namespace beaconinteriorsapi.Controllers
     [ApiController]
     public class CheckoutController : ControllerBase
     {
-        // GET: api/<CheckoutController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IValidator<CheckoutDTO> _validator;
+        private readonly IMapper _mapper;
+        private readonly CheckoutService _checkoutService;
+        public CheckoutController(IValidator<CheckoutDTO> validator,IMapper mapper, CheckoutService checkoutService)
         {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/<CheckoutController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
+           _validator = validator; 
+            _mapper = mapper;
+            _checkoutService = checkoutService;
         }
 
         // POST api/<CheckoutController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Checkout([FromBody] CheckoutDTO checkoutDetails)
         {
+            ValidationResult result = _validator.Validate(checkoutDetails);
+            if (!result.IsValid)
+            {
+                ThrowBadRequest("unable to valiate checkout details due to bad request", result.ToDictionary());
+            }
+            var command = _mapper.Map<CheckoutCommand>(checkoutDetails);
+            var paymentIntentId = await _checkoutService.CheckoutAsync(command);
+            return Ok(paymentIntentId);
         }
 
-        // PUT api/<CheckoutController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<CheckoutController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }

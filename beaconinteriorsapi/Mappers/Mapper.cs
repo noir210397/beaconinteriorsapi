@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using beaconinteriorsapi.DTOS;
 using beaconinteriorsapi.Models;
-using beaconinteriorsapi.Utils;
+//using beaconinteriorsapi.Utils;
 
 namespace beaconinteriorsapi.Mappers
 {
@@ -13,7 +13,7 @@ namespace beaconinteriorsapi.Mappers
             CreateMap<Product, ProductDTO>()
                 //.ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.Categories.Select(c => c.Name)))
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Select(i => i.Url)))
-                .ForMember(dest=>dest.Id,opt=>opt.MapFrom(src=>GuidUtils.ToGuidString(src.Id)))
+                //.ForMember(dest=>dest.Id,opt=>opt.MapFrom(src=>GuidUtils.ToGuidString(src.Id)))
                 .ReverseMap()
                 //ignore to prevent duplicate categories in DB
                 //.ForMember(dest => dest.Categories, opt => opt.Ignore())

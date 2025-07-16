@@ -5,6 +5,7 @@ using beaconinteriorsapi.Services;
 using dotenv.net;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
 builder.Logging.ClearProviders();
@@ -17,7 +18,10 @@ ValidatorOptions.Global.DefaultRuleLevelCascadeMode=CascadeMode.Stop;
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ApiExceptionFilter>();
-});
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+}); ;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

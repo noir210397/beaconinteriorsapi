@@ -8,15 +8,15 @@
             return guid.ToString();
         }
 
-        //public static Guid ToGuid(string input,string name )
-        //{
-        //    if (!Guid.TryParse(input, out var result))
-        //    {
-        //        throw new ArgumentException($"Invalid {name} Id ");
-        //    }
+        public static bool ToGuid(string input)
+        {
+            if (!Guid.TryParse(input, out var result))
+            {
+                return false;
+            }
 
-        //    return result;
-        //}
+            return true;
+        }
     }
 
 }

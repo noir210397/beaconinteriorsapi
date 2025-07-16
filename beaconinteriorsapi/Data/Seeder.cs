@@ -6,6 +6,7 @@ using beaconinteriorsapi.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public  class Seeder
 {
@@ -15,6 +16,8 @@ public  class Seeder
     private readonly ILogger _logger;
     public  string? RootPath;
     private List<ProductDTO>? Products { get; set; }
+    private List<Order>? Orders { get; set; }
+
     private string? ImageFolder { get; set; }
     public Seeder (BeaconInteriorsDBContext context,IMapper mapper,IFileService fileService,ILogger logger)
 	{
@@ -25,7 +28,13 @@ public  class Seeder
          RootPath = Environment.GetEnvironmentVariable("PATH");
         if (RootPath != null)
         {
-            Products = JsonSerializer.Deserialize<List<ProductDTO>>(File.ReadAllText($"{RootPath.Trim()}data.txt"));
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter() }
+            };
+            Products = JsonSerializer.Deserialize<List<ProductDTO>>(File.ReadAllText($"{RootPath.Trim()}data.txt"),options);
+            Orders = JsonSerializer.Deserialize<List<Order>>(File.ReadAllText($"{RootPath.Trim()}order.txt"),options);
             ImageFolder = $"{RootPath.Trim()}images";
         }
         else throw new Exception("PATH is not set in environment variables");
@@ -144,10 +153,18 @@ public  class Seeder
             _logger.LogError(ex, "Upload or delete failed: " + ex.Message);
         }
     }
+    public async Task SeedOrdersAsync()
+    {
+        if (Orders != null)
+        {
+        foreach (var order in Orders)
+        {
+                _context.Orders.Add(order);
+        }
 
+        await _context.SaveChangesAsync();
+        }
+        
+    }
 }
 
-public class SeedFileTest
-{
-   
-}

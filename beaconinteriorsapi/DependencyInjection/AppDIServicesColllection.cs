@@ -17,6 +17,8 @@ namespace beaconinteriorsapi.DependencyInjection
             services.AddScoped<IFileService, FileService>();
             services.AddValidatorsFromAssemblyContaining(typeof(CreateProductValidator));
             services.AddScoped<AppStartupService>();
+            services.AddScoped<CheckoutService>();
+            services.AddScoped<OrderService>();
             return services;
         }
     }

@@ -1,4 +1,6 @@
-﻿namespace beaconinteriorsapi.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace beaconinteriorsapi.Models
 {
     public class OrderItems
     {

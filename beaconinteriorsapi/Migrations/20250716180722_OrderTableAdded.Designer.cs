@@ -12,8 +12,8 @@ using beaconinteriorsapi.Data;
 namespace beaconinteriorsapi.Migrations
 {
     [DbContext(typeof(BeaconInteriorsDBContext))]
-    [Migration("20250711084747_OrderAdded")]
-    partial class OrderAdded
+    [Migration("20250716180722_OrderTableAdded")]
+    partial class OrderTableAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,6 +48,9 @@ namespace beaconinteriorsapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("AddressType")
+                        .HasColumnType("int");
+
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -56,7 +59,7 @@ namespace beaconinteriorsapi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("OrderId")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PostCode")
@@ -269,8 +272,10 @@ namespace beaconinteriorsapi.Migrations
             modelBuilder.Entity("beaconinteriorsapi.Models.Address", b =>
                 {
                     b.HasOne("beaconinteriorsapi.Models.Order", null)
-                        .WithMany("ShippingAddress")
-                        .HasForeignKey("OrderId");
+                        .WithMany("Addresses")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("beaconinteriorsapi.Models.Image", b =>
@@ -293,9 +298,9 @@ namespace beaconinteriorsapi.Migrations
 
             modelBuilder.Entity("beaconinteriorsapi.Models.Order", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("Addresses");
 
-                    b.Navigation("ShippingAddress");
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("beaconinteriorsapi.Models.Product", b =>

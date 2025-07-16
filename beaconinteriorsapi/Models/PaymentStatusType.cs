@@ -2,6 +2,7 @@
 {
     public enum PaymentStatusType
     {
+        Pending,
         Paid ,
         Failed,
         Canceled

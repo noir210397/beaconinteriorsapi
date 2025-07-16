@@ -56,7 +56,7 @@ namespace beaconinteriorsapi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("OrderId")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PostCode")
@@ -269,8 +269,10 @@ namespace beaconinteriorsapi.Migrations
             modelBuilder.Entity("beaconinteriorsapi.Models.Address", b =>
                 {
                     b.HasOne("beaconinteriorsapi.Models.Order", null)
-                        .WithMany("ShippingAddress")
-                        .HasForeignKey("OrderId");
+                        .WithMany("Addresses")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("beaconinteriorsapi.Models.Image", b =>
@@ -293,9 +295,9 @@ namespace beaconinteriorsapi.Migrations
 
             modelBuilder.Entity("beaconinteriorsapi.Models.Order", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("Addresses");
 
-                    b.Navigation("ShippingAddress");
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("beaconinteriorsapi.Models.Product", b =>
