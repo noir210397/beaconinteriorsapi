@@ -161,7 +161,7 @@ namespace beaconinteriorsapi.Services
         }
         private async Task<string> CreatePaymentIntentAsync(long amountInCents, string trackingId, string currency = "gbp")
         {
-            var stripeKey = Environment.GetEnvironmentVariable("STRIPE_API_KEY") ?? throw new Exception("stripe key not found");
+            var stripeKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY") ?? throw new Exception("stripe key not found");
             try
             {
                 var stripeClient = new StripeSDK.StripeClient(stripeKey);
