@@ -4,10 +4,12 @@ using beaconinteriorsapi.Data;
 using beaconinteriorsapi.DTOS;
 using beaconinteriorsapi.Models;
 using beaconinteriorsapi.Utils;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
-using StripeSDK=Stripe;
 using static beaconinteriorsapi.Exceptions.ExceptionHelpers;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using StripeSDK=Stripe;
 
 namespace beaconinteriorsapi.Services
 {
@@ -15,10 +17,13 @@ namespace beaconinteriorsapi.Services
     {
         private readonly BeaconInteriorsDBContext _dbContext;
         private readonly IMapper _mapper;
-       
-        public CheckoutService(BeaconInteriorsDBContext dbContext,IMapper mapper) { 
-        _dbContext = dbContext;
+        private readonly UserManager<User> _userManager;
+
+
+        public CheckoutService(BeaconInteriorsDBContext dbContext,IMapper mapper, UserManager<User> userManager) { 
+            _dbContext = dbContext;
             _mapper = mapper;
+            _userManager = userManager;
         }
         public async Task<string> CheckoutAsync(CheckoutCommand command)
         {
@@ -33,15 +38,23 @@ namespace beaconinteriorsapi.Services
             return paymentIntentId;
 
         }
-        private async Task<(bool IsValid, IDictionary<string, string[]> errors, List<OrderItems> orderItems, Guid? userId)> ValidateOrderAsync(CheckoutCommand command)
+        private async Task<(bool IsValid, IDictionary<string, string[]> errors, List<OrderItems> orderItems, string? userId)> ValidateOrderAsync(CheckoutCommand command)
         {
             Dictionary<string, string[]> errors = new ();
-            Guid? userGuid = null;
+            string? userId = null;
             var orderItems = new List<OrderItems>();
             //ensure atomicity
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             if (command.UserId != null) {
+                var user=_userManager.FindByIdAsync(command.UserId);
                 //find user here if not good add error to dictionary
+                if (user == null) 
+                errors.Add("user", ["unable to place order as invalid userId was provided"]);
+                else
+                {
+
+                    userId = command.UserId;
+                }
             }
             foreach (var item in command.Items)
             {
@@ -76,15 +89,15 @@ namespace beaconinteriorsapi.Services
             if (errors.Count > 0)
             {
                 await transaction.RollbackAsync();
-                return (false, errors, [], userGuid);
+                return (false, errors, [], userId);
             }
 
              await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
-            return (true, errors, orderItems, userGuid);
+            return (true, errors, orderItems, userId);
 
         }
-        private async Task<string> CreateOrderAsync(Guid? userId, List<OrderItems> orderItems, CheckoutCommand checkoutDTO)
+        private async Task<string> CreateOrderAsync(string? userId, List<OrderItems> orderItems, CheckoutCommand checkoutDTO)
         {
             using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
@@ -92,10 +105,6 @@ namespace beaconinteriorsapi.Services
             {
                 List<Address> addresses = new List<Address>();
                 //return user from validating order and use here then add to order
-                if (userId != null)
-                {
-                    // Optional: validate user exists and retrieve if needed
-                }
 
                 // Add shipping address if it exists
                 if (checkoutDTO.ShippingAddress != null)
@@ -127,8 +136,16 @@ namespace beaconinteriorsapi.Services
                     PaymentStatus = PaymentStatusType.Pending,
                     TrackingID = trackingId,
                     Items = orderItems,
-                    //UserId = userId
+                    FirstName = checkoutDTO.FirstName,
+                    LastName = checkoutDTO.LastName,
+                    CreatedDate=DateTime.UtcNow,
+                    HasExpired=false,
                 };
+                if (userId != null)
+                {
+                    var user = await _userManager.FindByIdAsync(userId);
+                    newOrder.UserId=user!.Id;
+                }
 
                 await _dbContext.Orders.AddAsync(newOrder);
                 await _dbContext.SaveChangesAsync();

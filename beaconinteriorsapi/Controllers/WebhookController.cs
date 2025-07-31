@@ -46,6 +46,7 @@ namespace beaconinteriorsapi.Controllers
                         {
                             order.PaymentStatus = PaymentStatusType.Paid; // or appropriate status enum
                             await _context.SaveChangesAsync();
+                            //send email confirmation here
                         }
                     }
                     _logger.LogInformation("A successful payment for {0} was made.", paymentIntent.Amount);
@@ -100,12 +101,9 @@ namespace beaconinteriorsapi.Controllers
             }
         }
 
-            [HttpGet("Tracking")]
+        [HttpGet("Tracking")]
         public async Task<IActionResult> TrackUpdate()
         {
-            // Assuming you have a DbContext injected, e.g., _context
-
-            // 1. Get the Tracking record (assuming single record with Id = 1 or latest)
             var tracking = await _context.Tracking.FirstOrDefaultAsync();
 
             if (tracking == null)
@@ -153,6 +151,42 @@ namespace beaconinteriorsapi.Controllers
         }
 
 
+        [HttpGet("Orders")]
+        public async Task AuditAndExpireOrdersAsync()
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var orders = await _context.Orders.Where(o=>o.PaymentStatus==PaymentStatusType.Processing|| o.PaymentStatus == PaymentStatusType.Pending).ToListAsync();
+
+                foreach (var order in orders)
+                {
+                    var timeSinceCreation = DateTime.UtcNow - order.CreatedDate;
+
+                    if (order.PaymentStatus == PaymentStatusType.Pending && timeSinceCreation.TotalMinutes > 15)
+                    {
+                        order.HasExpired = true;
+                    }
+                    else if (order.PaymentStatus == PaymentStatusType.Processing && timeSinceCreation.TotalHours > 2)
+                    {
+                        order.PaymentStatus = PaymentStatusType.Pending;
+                        order.HasExpired = true;
+                        //release products back to store
+                    }
+
+                    // You can also optionally log or collect affected orders here
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
 
     }
 }

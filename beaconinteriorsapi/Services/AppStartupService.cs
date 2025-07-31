@@ -1,32 +1,34 @@
-﻿using AutoMapper;
-using beaconinteriorsapi.Data;
+﻿using beaconinteriorsapi.Data;
+
 
 namespace beaconinteriorsapi.Services
 {
     public class AppStartupService
     {
-        private readonly IMapper _mapper;
-        private readonly IFileService _fileService;
+       
         private readonly ILogger<AppStartupService> _logger;
         private readonly BeaconInteriorsDBContext _dbContext;
-        public AppStartupService(IMapper mapper,IFileService fileService,ILogger<AppStartupService> logger,BeaconInteriorsDBContext dbContext)
+        private readonly Seeder _seeder;
+
+        public AppStartupService(ILogger<AppStartupService> logger,BeaconInteriorsDBContext dbContext,Seeder seeder)
         {
-            _mapper = mapper;
-            _fileService = fileService;
+            
             _logger = logger;
             _dbContext = dbContext;
+            _seeder = seeder;
         }
         public async Task Initialize()
         {
             try
             {
-                var seeder = new Seeder(_dbContext, _mapper, _fileService,_logger);
                 _dbContext.Database.EnsureDeleted();
                 _dbContext.Database.EnsureCreated();
-                await seeder.RunTestAsync();
-                await seeder.SeedCategories();
-                await seeder.SeedProductsAsync();
-                await seeder.SeedOrdersAsync();
+                await _seeder.RunFileUploadTestAsync();
+                await _seeder.SeedCategories();
+                await _seeder.SeedProductsAsync();
+                await _seeder.SeedOrdersAsync();
+                await _seeder.SeedRolesAsync();
+                await _seeder.SeedUsersAsync();
                 _logger.LogInformation("seeding and test completed");
 
             }

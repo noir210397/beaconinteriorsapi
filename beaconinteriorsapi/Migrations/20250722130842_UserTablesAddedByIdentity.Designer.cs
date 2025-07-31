@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using beaconinteriorsapi.Data;
 
@@ -11,9 +12,11 @@ using beaconinteriorsapi.Data;
 namespace beaconinteriorsapi.Migrations
 {
     [DbContext(typeof(BeaconInteriorsDBContext))]
-    partial class BeaconInteriorsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250722130842_UserTablesAddedByIdentity")]
+    partial class UserTablesAddedByIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

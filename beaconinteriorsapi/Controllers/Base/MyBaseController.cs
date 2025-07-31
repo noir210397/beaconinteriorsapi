@@ -7,9 +7,9 @@ namespace beaconinteriorsapi.Controllers.Base
     {
         protected abstract string ResourceName { get; }
 
-        protected void ValidateString(string value, string message = "please provide a valid value")
+        protected void ValidateString(string value, string message = "unable to access resource as invalid value was provided ")
             {
-                if (string.IsNullOrEmpty(value)) { ThrowBadRequest($"unable to access {ResourceName} as invalid value was provided",null, message); }
+                if (string.IsNullOrEmpty(value)) { ThrowBadRequest(message?? $"unable to access {ResourceName} as invalid value was provided",null,message); }
             }
             protected Guid ToGuidOrThrowBadRequestError(string id)
             {
@@ -19,5 +19,12 @@ namespace beaconinteriorsapi.Controllers.Base
                 }
                 return guid;
             }
+        protected int ValidatePageNumber(int value) {
+            if ( value == 0)
+            {
+                return 1;
+            }
+            return value;
+        }
     }
 }

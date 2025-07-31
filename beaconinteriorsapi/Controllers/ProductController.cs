@@ -1,8 +1,11 @@
 ﻿using beaconinteriorsapi.Controllers.Base;
 using beaconinteriorsapi.DTOS;
+using beaconinteriorsapi.Models;
 using beaconinteriorsapi.Services;
+using beaconinteriorsapi.Utils;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using static beaconinteriorsapi.Exceptions.ExceptionHelpers;
@@ -19,7 +22,7 @@ namespace beaconinteriorsapi.Controllers
         private readonly IValidator<CreateProductDTO> _createProductValidator;
         private readonly IValidator<UpdateProductDTO> _updateProductValidator;
         private readonly ILogger<ProductController> _logger;
-        protected override string ResourceName => "product";
+        protected override string ResourceName => "Product";
 
         public ProductController(ProductService service,IValidator<CreateProductDTO> createProductValidator,IValidator<UpdateProductDTO> updateProductValidator,ILogger<ProductController> logger)
         {
@@ -34,10 +37,11 @@ namespace beaconinteriorsapi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-        public async  Task<IActionResult> GetProducts()
-        {      
+        public async  Task<IActionResult> GetProducts([FromQuery] PaginationParams pagination)
+        {
+            var(page,pageSize)=pagination.Normalize();
             _logger.LogInformation("received request to get all products at {Date}",DateTime.UtcNow);
-            return Ok(await _service.GetProductsAsync());
+            return Ok(await _service.GetProductsAsync(page,pageSize));
         }
 
         // GET api/<ProductController>/5
@@ -60,6 +64,7 @@ namespace beaconinteriorsapi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Consumes("multipart/form-data")]
+        [Authorize(Roles ="SuperAdmin,Admin")]
         public async Task<IActionResult> CreateProduct([FromForm] CreateProductDTO productDto)
         {
             _logger.LogInformation("Received request to create product:{ProductName} at {Date}", productDto.Name, DateTime.UtcNow);
@@ -79,6 +84,7 @@ namespace beaconinteriorsapi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Consumes("multipart/form-data")]
+        [Authorize(Roles = "SuperAdmin,Admin")]
         public async Task<IActionResult> UpdateProduct(string productId, [FromForm] UpdateProductDTO productToUpdate)
         {
             _logger.LogInformation("Received request to update product with Id:{ProductId}, Name:{ProductName} at {Date}",productId, productToUpdate.Name, DateTime.UtcNow);
@@ -99,32 +105,23 @@ namespace beaconinteriorsapi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "SuperAdmin,Admin")]
         public async Task<IActionResult> DeleteProduct(string productId )
         {
             _logger.LogInformation("received request to delete product with Id:{ProductId} at {Date}",productId, DateTime.UtcNow);
             await _service.RemoveProductByIdAsync(ToGuidOrThrowBadRequestError(productId));
             return NoContent();
         }
-        [HttpGet("Category/{category}")]
+        [HttpGet("search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> SearchProductsByCategory(string category)
+        public async Task<IActionResult> SearchProductsByNameAndCategory([FromQuery] ProductSearchParams searchParams)
         {
-            _logger.LogInformation("received request to search for products in category:{CategoryName} product at {Date}", category, DateTime.UtcNow);
-            ValidateString(category, "no category provided to search by");
-            return Ok(await _service.GetProductsByCategoryAsync(category));    
+            _logger.LogInformation("received request to search for products at {Date}", DateTime.UtcNow);
+            return Ok(await _service.SearchProductsByNameAndCategoryAsync(searchParams));    
         }
-        [HttpGet("Name/{category}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> SearchProductsByName(string name)
-        {
-            _logger.LogInformation("received request to search for products with Name:{ProductName} at {Date}",name, DateTime.UtcNow);
-            ValidateString(name,"no name provided to search by");
-            return Ok(await _service.GetProductsByNameAsync(name));
-        }
+       
     }
 }

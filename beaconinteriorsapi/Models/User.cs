@@ -1,10 +1,10 @@
-﻿namespace beaconinteriorsapi.Models
+﻿using Microsoft.AspNetCore.Identity;
+namespace beaconinteriorsapi.Models
 {
-    public class User
+    public class User:IdentityUser
     {
-        public required string EmailAddress { get; set; }
-        public required string PasswordHash { get; set; }
-
-
+       public required string FirstName { get; set; }
+       public required string LastName { get; set; }
+       public bool MustChangePassWord { get; set; }=false;
     }
 }

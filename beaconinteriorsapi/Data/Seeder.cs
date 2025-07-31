@@ -3,6 +3,7 @@ using beaconinteriorsapi.Data;
 using beaconinteriorsapi.DTOS;
 using beaconinteriorsapi.Models;
 using beaconinteriorsapi.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Text.Json;
@@ -14,18 +15,24 @@ public  class Seeder
     private readonly IMapper _mapper;
     private readonly IFileService _fileService;
     private readonly ILogger _logger;
+    private readonly UserManager<User> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     public  string? RootPath;
     private List<ProductDTO>? Products { get; set; }
     private List<Order>? Orders { get; set; }
+    private List<SeedUserDTO>? Users { get; set; } 
 
     private string? ImageFolder { get; set; }
-    public Seeder (BeaconInteriorsDBContext context,IMapper mapper,IFileService fileService,ILogger logger)
-	{
+
+    public Seeder(IMapper mapper, IFileService fileService, ILogger<Seeder> logger, BeaconInteriorsDBContext context, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
+    {
         _mapper = mapper;
-        _context = context;
         _fileService = fileService;
         _logger = logger;
-         RootPath = Environment.GetEnvironmentVariable("PATH");
+        _context = context;
+        _roleManager = roleManager;
+        _userManager = userManager;
+        RootPath = Environment.GetEnvironmentVariable("PATH");
         if (RootPath != null)
         {
             var options = new JsonSerializerOptions
@@ -33,13 +40,20 @@ public  class Seeder
                 PropertyNameCaseInsensitive = true,
                 Converters = { new JsonStringEnumConverter() }
             };
-            Products = JsonSerializer.Deserialize<List<ProductDTO>>(File.ReadAllText($"{RootPath.Trim()}data.txt"),options);
-            Orders = JsonSerializer.Deserialize<List<Order>>(File.ReadAllText($"{RootPath.Trim()}order.txt"),options);
+            Products = JsonSerializer.Deserialize<List<ProductDTO>>(File.ReadAllText($"{RootPath.Trim()}data.txt"), options);
+            Orders = JsonSerializer.Deserialize<List<Order>>(File.ReadAllText($"{RootPath.Trim()}order.txt"), options);
+            Users= JsonSerializer.Deserialize<List<SeedUserDTO>>(File.ReadAllText($"{RootPath.Trim()}users.txt"), options);
             ImageFolder = $"{RootPath.Trim()}images";
         }
         else throw new Exception("PATH is not set in environment variables");
-        
-    } 
+    }
+    public class SeedUserDTO : LoginDTO
+    {
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public List<string> Roles { get; set; } = new();
+    }
+
     public async Task SeedCategories()
     {
         if (Products != null) {
@@ -104,7 +118,7 @@ public  class Seeder
 
     }
 
-    public async Task RunTestAsync()
+    public async Task RunFileUploadTestAsync()
     {
         if (string.IsNullOrWhiteSpace(ImageFolder) || !Directory.Exists(ImageFolder))
         {
@@ -159,12 +173,67 @@ public  class Seeder
         {
         foreach (var order in Orders)
         {
+                order.CreatedDate = DateTime.UtcNow;
+                order.HasExpired = false;
                 _context.Orders.Add(order);
         }
 
         await _context.SaveChangesAsync();
         }
         
+    }
+    public async Task SeedRolesAsync()
+    {
+        foreach (var role in Enum.GetNames(typeof(UserRoleType)))
+        {
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+    }
+    public async Task SeedUsersAsync()
+    {
+        if (Users!=null)
+        {
+            foreach (var seedUser in Users)
+            {
+                var userExists = await _userManager.FindByEmailAsync(seedUser.Email);
+                if (userExists == null)
+                {
+                    var newUser = new User()
+                    {
+                        FirstName=seedUser.FirstName,
+                        LastName=seedUser.LastName,
+                        Email = seedUser.Email,
+                        UserName = seedUser.Email
+                    };
+
+                    var createResult = await _userManager.CreateAsync(newUser, seedUser.Password);
+                    if (createResult.Succeeded)
+                    {
+                        foreach (var role in seedUser.Roles)
+                        {
+                            if (!await _roleManager.RoleExistsAsync(role))
+                            {
+                                await _roleManager.CreateAsync(new IdentityRole(role));
+                            }
+
+                            await _userManager.AddToRoleAsync(newUser, role);
+                        }
+                    }
+                    else
+                    {
+                        var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                        _logger.LogError($"Failed to create user {seedUser.Email}: {errors}");
+                    }
+                }
+                else
+                {
+                    _logger.LogError($"User {seedUser.Email} already exists.");
+                }
+            }
+        }
     }
 }
 

@@ -2,6 +2,7 @@
 using beaconinteriorsapi.Controllers.Base;
 using beaconinteriorsapi.DTOS;
 using beaconinteriorsapi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -50,6 +51,7 @@ namespace beaconinteriorsapi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "SuperAdmin,Admin")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryDTO categoryDto)
         {
             _logger.LogInformation("received request to add category with name:{ProducName} at {Date}", categoryDto.Name, DateTime.UtcNow);
@@ -64,6 +66,7 @@ namespace beaconinteriorsapi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "SuperAdmin,Admin")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDTO category)
         {
 
@@ -78,6 +81,7 @@ namespace beaconinteriorsapi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "SuperAdmin,Admin")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             _logger.LogInformation("received request to delete product with Id:{ProductId} at {Date}", id, DateTime.UtcNow);

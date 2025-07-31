@@ -1,0 +1,23 @@
+[
+  {
+    "firstName":"george",
+    "lastName":"lucas",
+    "email": "georgelucas@beaconinteriors.com",
+    "password": "Admin#1",
+    "roles": ["Admin"]
+  },
+  {
+  "firstName":"cherill",
+    "lastName":"mendes",
+    "email": "superadmin@beaconinteriors.com",
+    "password": "Super#2",
+    "roles": ["SuperAdmin"]
+  },
+  {
+  "firstName":"neo",
+    "lastName":"conners",
+    "email": "neoconners@gmail.com",
+    "password": "User#3",
+    "roles": ["User"]
+  }
+]

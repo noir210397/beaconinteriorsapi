@@ -1,5 +1,6 @@
 ﻿using beaconinteriorsapi.Data;
 using beaconinteriorsapi.Models;
+using beaconinteriorsapi.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace beaconinteriorsapi.Repositories
@@ -7,9 +8,9 @@ namespace beaconinteriorsapi.Repositories
     public class ProductRepository(BeaconInteriorsDBContext dbContext)
     {
         private readonly BeaconInteriorsDBContext _dbContext=dbContext;
-        public async Task<IEnumerable<Product>> GetAllAsync()
+        public async Task<IEnumerable<Product>> GetProductsPaginatedAsync(int page,int pageSize)
         {
-                return await _dbContext.Products.Include(p => p.Images).Include(c => c.Categories).ToListAsync(); 
+                return await _dbContext.Products.Include(p => p.Images).Include(c => c.Categories).AsQueryable().Paginate(page,pageSize).ToListAsync(); 
 
         }
         public async Task<Product?> GetByIdAsync(Guid productId)
@@ -17,24 +18,16 @@ namespace beaconinteriorsapi.Repositories
                 return await _dbContext.Products.Include(p => p.Images).Include(c => c.Categories).FirstOrDefaultAsync(p => p.Id == productId);
 
         }
-        public async Task<IEnumerable<Product>> SearchByCategoryAsync(string categoryName)
+        public async Task<IEnumerable<Product>> SearchByCategoryAndNameAsync(ProductSearchParams searchParams)
         {
-                return await _dbContext.Products
-                    .Include(p => p.Images)
-                    .Include(p => p.Categories)
-                    .Where(p => p.Categories.Any(c => c.Name.ToLower() == categoryName.Trim().ToLower()))
-                    .ToListAsync();
-            
-        }
-
-        public async Task<IEnumerable<Product>> SearchByNameAsync(string name)
-        {
-                return await _dbContext.Products
-                    .Include(p => p.Images)
-                    .Include(p => p.Categories)
-                    .Where(p => p.Name.ToLower().Contains(name.ToLower()))
-                    .ToListAsync();
-
+            var query = _dbContext.Products
+                .AsQueryable().Include(p => p.Images)
+                .Include(p => p.Categories).AsQueryable();
+            if (!string.IsNullOrEmpty(searchParams.Name))
+                query=query.Where(p => p.Name.ToLower().Contains(searchParams.Name.Trim().ToLower()));
+            if (!string.IsNullOrEmpty(searchParams.Category))
+                query=query.Where(p => p.Categories.Any(c => c.Name.ToLower() == searchParams.Category.Trim().ToLower()));
+            return await query.ToListAsync();
         }
         public async Task CreateAsync(Product product)
         {
@@ -56,13 +49,6 @@ namespace beaconinteriorsapi.Repositories
                 _dbContext.Products.Remove(product);
                 await _dbContext.SaveChangesAsync();
                 return true;
-        }
-        public async Task UpdateAsync(Product product)
-        {
-            
-                _dbContext.Products.Update(product);
-                await _dbContext.SaveChangesAsync();
-            
         }
 
     }

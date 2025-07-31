@@ -17,17 +17,22 @@ namespace beaconinteriorsapi.Filters
             switch (context.Exception)
             {
                 case NotFoundException ex:
-                    _logger.LogWarning(ex, ex.LogMessage);
+                    _logger.LogWarning(ex, ex.LogMessage??ex.Message);
                     context.Result = new NotFoundObjectResult(ex.Response);
                     break;
 
                 case BadRequestException ex:
-                    _logger.LogInformation(ex, ex.LogMessage);
+                    _logger.LogInformation(ex, ex.LogMessage ?? ex.Message);
                     context.Result = new BadRequestObjectResult(ex.Response);
                     break;
 
+                case UnauthorizizedException ex:
+                    _logger.LogError(ex, ex.LogMessage ?? ex.Message);
+                    context.Result = new UnauthorizedObjectResult(ex.Response);
+                    break;
+
                 case ServerErrorException ex:
-                    _logger.LogError(ex, ex.LogMessage);
+                    _logger.LogError(ex, ex.LogMessage ?? ex.Message);
                     context.Result = new ObjectResult(ex.Response)
                     {
                         StatusCode = 500

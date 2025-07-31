@@ -18,7 +18,8 @@ namespace beaconinteriorsapi.Validators
                         context.AddFailure("Invalid userId provided.");
                     }
                 });
-
+            RuleFor(x => x.FirstName).NotEmpty().WithMessage("first name is required");
+            RuleFor(x => x.LastName).NotEmpty().WithMessage("first name is required");
             RuleFor(x => x.Items)
                 .NotEmpty()
                 .WithMessage("At least one item is required.")

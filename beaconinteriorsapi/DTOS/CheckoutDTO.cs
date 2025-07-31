@@ -4,7 +4,9 @@ namespace beaconinteriorsapi.DTOS
 {
     public class CheckoutDTO
     {
-       public required string? UserId { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public required string? UserId { get; set; }
        public List<ItemDTO> Items { get; set; } = [];
        public required AddressDTO BillingAddress { get; set; }
        public AddressDTO? ShippingAddress { get; set; }

@@ -17,7 +17,7 @@
       "applicationUrl": "http://localhost:5030",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "PATH": "C:\\Users\\HP\\source\\repos\\beaconinteriorsapi\\beaconinteriorsapi\\"
+        //"PATH": "C:\\Users\\HP\\source\\repos\\beaconinteriorsapi\\beaconinteriorsapi\\"
       }
     },
     "https": {
@@ -28,7 +28,7 @@
       "applicationUrl": "https://localhost:7018;http://localhost:5030",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "PATH": "C:\\Users\\HP\\source\\repos\\beaconinteriorsapi\\beaconinteriorsapi\\"
+        //"PATH": "C:\\Users\\HP\\source\\repos\\beaconinteriorsapi\\beaconinteriorsapi\\"
 
       }
     },
@@ -37,8 +37,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "PATH": "C:\\Users\\HP\\source\\repos\\beaconinteriorsapi\\beaconinteriorsapi\\"
+        //"ASPNETCORE_ENVIRONMENT": "Development",
+        //"PATH": "C:\\Users\\HP\\source\\repos\\beaconinteriorsapi\\beaconinteriorsapi\\"
 
       }
     }

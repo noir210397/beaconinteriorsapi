@@ -10,7 +10,9 @@ namespace beaconinteriorsapi.Commands
 
     public class CheckoutCommand
     {
-        public required Guid? UserId { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public required string? UserId { get; set; }
         public List<ItemCommand> Items { get; set; } = [];
         public required string PhoneNumber { get; set; }
         public required string EmailAddress { get; set; }

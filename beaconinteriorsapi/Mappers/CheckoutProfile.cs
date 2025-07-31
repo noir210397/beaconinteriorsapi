@@ -13,8 +13,8 @@ namespace beaconinteriorsapi.Mappers
                 .ForMember(dest => dest.UserId,
                            opt => opt.MapFrom(src =>
                                string.IsNullOrWhiteSpace(src.UserId)
-                                   ? (Guid?)null
-                                   : Guid.Parse(src.UserId!)))
+                                   ? null
+                                   : src.UserId))
                 .ForMember(dest => dest.Items,
                            opt => opt.MapFrom(src => src.Items));
 

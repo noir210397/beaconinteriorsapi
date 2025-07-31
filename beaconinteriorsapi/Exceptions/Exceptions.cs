@@ -30,8 +30,14 @@ namespace beaconinteriorsapi.Exceptions
         {
         }
     }
+    public class UnauthorizizedException : BaseException
+    {
+        public UnauthorizizedException(ErrorResponse response, string? logMessage) : base(response, logMessage)
+        {
+        }
+    }
 
-        public static class ExceptionHelpers
+    public static class ExceptionHelpers
         {
             public static void ThrowNotFound(string? message, IDictionary<string, string[]>? errors= null,  string? logMessage= null)
                 => throw new NotFoundException(ErrorResponse.Create(message,errors),logMessage);
@@ -41,7 +47,9 @@ namespace beaconinteriorsapi.Exceptions
 
             public static void ThrowServerError( string? logMessage = null)
                 => throw new ServerErrorException(ErrorResponse.Create("internal server error"), logMessage);
-        }
+            public static void ThrowUnauthorizedError(string message ,string? logMessage = null)
+                => throw new UnauthorizizedException(ErrorResponse.Create(message), logMessage);
+    }
     
 
 }
