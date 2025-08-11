@@ -178,7 +178,7 @@ namespace beaconinteriorsapi.Services
 
                 var paymentIntent = await paymentIntentService.CreateAsync(options);
 
-                return paymentIntent.Id;
+                return paymentIntent.ClientSecret;
             }
             catch (Exception e)
             {
