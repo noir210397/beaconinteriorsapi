@@ -165,6 +165,7 @@ public  class Seeder
         catch (Exception ex)
         {
             _logger.LogError(ex, "Upload or delete failed: " + ex.Message);
+            throw ;
         }
     }
     public async Task SeedOrdersAsync()

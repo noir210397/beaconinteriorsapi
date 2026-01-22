@@ -37,11 +37,11 @@ namespace beaconinteriorsapi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-        public async  Task<IActionResult> GetProducts([FromQuery] PaginationParams pagination)
+        public async  Task<IActionResult> GetProducts([FromQuery] PaginationParams pagination, [FromQuery] ProductSearchParams searchParams)
         {
             var(page,pageSize)=pagination.Normalize();
             _logger.LogInformation("received request to get all products at {Date}",DateTime.UtcNow);
-            return Ok(await _service.GetProductsAsync(page,pageSize));
+            return Ok(await _service.GetProductsAsync(page,pageSize,searchParams.Name,searchParams.Category));
         }
 
         // GET api/<ProductController>/5
@@ -111,16 +111,6 @@ namespace beaconinteriorsapi.Controllers
             _logger.LogInformation("received request to delete product with Id:{ProductId} at {Date}",productId, DateTime.UtcNow);
             await _service.RemoveProductByIdAsync(ToGuidOrThrowBadRequestError(productId));
             return NoContent();
-        }
-        [HttpGet("search")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> SearchProductsByNameAndCategory([FromQuery] ProductSearchParams searchParams)
-        {
-            _logger.LogInformation("received request to search for products at {Date}", DateTime.UtcNow);
-            return Ok(await _service.SearchProductsByNameAndCategoryAsync(searchParams));    
         }
        
     }

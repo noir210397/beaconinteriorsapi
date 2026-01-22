@@ -32,14 +32,12 @@ namespace beaconinteriorsapi.Controllers
 
         // GET api/<OrderController>/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetSingleOrder(string id)
+        public async Task<IActionResult> GetSingleOrder(Guid id)
         {
-            var orderId = ToGuidOrThrowBadRequestError(id);
-            return Ok(await _orderService.GetSingleOrderAsync(orderId));
+            return Ok(await _orderService.GetSingleOrderAsync(id));
 
         }
         [HttpGet("user/{userId}")]
-        [Authorize(Roles = "User")]
         public async Task<IActionResult> GetUserOrders(string userId)
         {
             ValidateString(userId);
@@ -63,12 +61,11 @@ namespace beaconinteriorsapi.Controllers
         }
         // DELETE api/<OrderController>/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var roles=_principal.FindAll(ClaimTypes.Role).Select(c=>c.Value);
-            var userId = _principal.FindFirst(JwtRegisteredClaimNames.Sub)!.Value;
-            var orderId = ToGuidOrThrowBadRequestError(id);
-            await _orderService.DeleteOrderAsync(orderId,roles,userId);
+            //var roles=_principal.FindAll(ClaimTypes.Role).Select(c=>c.Value);
+            //var userId = _principal.FindFirst(JwtRegisteredClaimNames.Sub)!.Value;
+            await _orderService.DeleteOrderAsync(id);
             return NoContent();
         }
 

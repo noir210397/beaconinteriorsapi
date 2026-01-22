@@ -29,10 +29,10 @@ namespace beaconinteriorsapi.Services
             _fileService = fileService;
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetProductsAsync(int page, int pageSize)
+        public async Task<IEnumerable<ProductDTO>> GetProductsAsync(int page, int pageSize,string? name,List<string> category)
         {
             _logger.LogInformation("Attempting to fetch products in Database at {Date}", DateTime.Now);
-            var products = await _repository.GetProductsPaginatedAsync(page, pageSize);
+            var products = await _repository.GetProductsPaginatedAsync(page, pageSize,name,category);
             return _mapper.Map<IEnumerable<Product>, IList<ProductDTO>>(products!);
         }
         public async Task<ProductDTO> GetSingleProductAsync(Guid productId)
@@ -127,11 +127,6 @@ namespace beaconinteriorsapi.Services
             if (!deleted) ThrowNotFound($"product with id: {productId} not found");
         }
 
-        public async Task<IEnumerable<ProductDTO>> SearchProductsByNameAndCategoryAsync(ProductSearchParams searchParams)
-        {
-            _logger.LogInformation("Attempting to get products based on seearch params from Database at {Date}", DateTime.Now);
-            var products = await _repository.SearchByCategoryAndNameAsync(searchParams);
-            return _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(products);
-        }
+
     }
 }

@@ -2,6 +2,8 @@
 using beaconinteriorsapi.Data;
 using beaconinteriorsapi.Models;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using static beaconinteriorsapi.Exceptions.ExceptionHelpers;
 
 namespace beaconinteriorsapi.Services
@@ -10,10 +12,12 @@ namespace beaconinteriorsapi.Services
     {
         private readonly IMapper _mapper;
         private readonly BeaconInteriorsDBContext _dbContext;
-        public OrderService(BeaconInteriorsDBContext dbContext,IMapper mapper)
+        private readonly ClaimsPrincipal _principal;
+        public OrderService(BeaconInteriorsDBContext dbContext,IMapper mapper,ClaimsPrincipal principal)
         {
           _dbContext = dbContext;
           _mapper = mapper;
+            _principal = principal;
         }
         public async Task<IEnumerable<Order>> GetAllOrdersAsync()
         {
@@ -21,13 +25,26 @@ namespace beaconinteriorsapi.Services
         }
         public async Task<IEnumerable<Order>> GetUserOrdersAsync(string id)
         {
+            var isAdmin = _principal.FindAll(ClaimTypes.Role).Select(r=>r.Value).Any(r=>r==UserRoleType.SuperAdmin.ToString()||r==UserRoleType.Admin.ToString());
+            var userId = _principal.FindFirst(JwtRegisteredClaimNames.Sub)!.Value;
+            if(!isAdmin && userId!=id)
+            {
+                ThrowUnauthorizedError("Unauthorized");
+            }
             return await _dbContext.Orders.Include(o => o.Addresses).Include(o => o.Items).Where(o=>o.UserId==id).ToListAsync();
         }
         public async Task<Order> GetSingleOrderAsync(Guid id)
         {
+            var isAdmin = _principal.FindAll(ClaimTypes.Role).Select(r => r.Value).Any(r => r == UserRoleType.SuperAdmin.ToString() || r == UserRoleType.Admin.ToString());
+            var userId = _principal.FindFirst(JwtRegisteredClaimNames.Sub)!.Value;
             var order=await _dbContext.Orders.Include(o=>o.Addresses).Include(o=>o.Items).FirstOrDefaultAsync(o=>o.Id==id);
             if (order == null) ThrowNotFound($"no order found with id:{id.ToString()}");
+            if (!isAdmin && userId != order!.Id.ToString())
+            {
+                ThrowUnauthorizedError("Unauthorized");
+            }
             return order!;
+            
         }
         public async Task<Order> TrackOrderAsync(string id)
         {
@@ -47,19 +64,34 @@ namespace beaconinteriorsapi.Services
                 return false;
             }
         }
-        public async Task DeleteOrderAsync(Guid id,IEnumerable<string> roles,string userId)
+        public async Task DeleteOrderAsync(Guid id)
         {
             var order=await _dbContext.Orders.Include(o => o.Addresses).Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
             if (order == null) ThrowNotFound($"no order found with id:{id.ToString()}");
-            if (roles.Any(r => r.Equals(UserRoleType.SuperAdmin.ToString())) || order!.UserId == userId)
-            {
+             else
+                {
+                var userId = _principal.FindFirst(JwtRegisteredClaimNames.Sub)!.Value;
+
+                var roles = _principal.FindAll(ClaimTypes.Role)
+                                      .Select(r => r.Value);
+
+                var isAdmin = roles.Any(r =>
+                    r == UserRoleType.Admin.ToString() ||
+                    r == UserRoleType.SuperAdmin.ToString());
+
+                var isOwner = order.Id.ToString() == userId;
+
+                if (!isAdmin && !isOwner)
+                {
+                    ThrowUnauthorizedError("Unauthorized");
+                }
                 _dbContext.Orders.Remove(order!);
                 await _dbContext.SaveChangesAsync();
-            }
-            else
-            {
-                ThrowUnauthorizedError("unauthorized");
-            }
+                }
         }
+
+        
+        
+
     }
 }

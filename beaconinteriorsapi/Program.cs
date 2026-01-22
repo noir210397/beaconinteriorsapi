@@ -1,7 +1,6 @@
 using beaconinteriorsapi.Data;
 using beaconinteriorsapi.DependencyInjection;
 using beaconinteriorsapi.Filters;
-using beaconinteriorsapi.Middlewares;
 using beaconinteriorsapi.Models;
 using beaconinteriorsapi.Services;
 using dotenv.net;
@@ -18,7 +17,7 @@ DotEnv.Load();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-ValidatorOptions.Global.DefaultRuleLevelCascadeMode=CascadeMode.Stop;
+ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
 
 // Add services to the container.
 
@@ -34,7 +33,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins("https://localhost:3000").AllowAnyMethod().AllowAnyHeader()));
-builder.Services.AddDbContext<BeaconInteriorsDBContext>(options =>  options.UseSqlServer(builder.Configuration.GetConnectionString("BeaconInteriorsDBConnection")));
+builder.Services.AddDbContext<BeaconInteriorsDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("BeaconInteriorsDBConnection")));
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<BeaconInteriorsDBContext>()
     .AddDefaultTokenProviders();
@@ -59,11 +58,11 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!))
     };
 });
+
+//add application services
 builder.Services.AddAppServices();
+
 var app = builder.Build();
-
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -78,8 +77,6 @@ app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
-//add whitelist in appsettings to block forbidden 
-//app.UseWhitelist();
 app.MapControllers();
 
 app.Run();

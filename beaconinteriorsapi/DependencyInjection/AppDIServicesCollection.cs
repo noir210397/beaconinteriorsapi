@@ -26,9 +26,13 @@ namespace beaconinteriorsapi.DependencyInjection
             services.AddScoped<AuthService>();
             services.AddScoped<UserService>();
             services.AddScoped<Seeder>();
-            services.AddScoped<ClaimsPrincipal>(s =>
+            services.AddScoped<ClaimsPrincipal>((s) =>
             {
-                IHttpContextAccessor context=s.GetService<IHttpContextAccessor>();
+                var context = s.GetService<IHttpContextAccessor>();
+                // if(context == null || context.HttpContext == null || context.HttpContext.User == null)
+                // {
+                //     return new ClaimsPrincipal();
+                // }
                 return context!.HttpContext!.User;
             });
             return services;
